@@ -38,10 +38,39 @@ android {
             }
         }
     }
+    externalNativeBuild {
+        ndkBuild {
+            path 'src/main/cpp/Android.mk'
+        }
+    }
     sourceSets {
         main {
             java.srcDirs    = [ 'src/main/java' ]
             jniLibs.srcDirs = [ 'libs' ]
         }
     }
+}
+
+// Location of where to store the jni wrapped files
+def coreWrapperDir = new File("${projectDir}/src/main/java/nl/igorski/lib/audio/mwengine")
+
+task createCoreWrapperDir {
+    coreWrapperDir.mkdirs()
+}
+
+// For this to work, it's assumed SWIG is installed
+// TODO: This only works when called from Command Line (gradlew runSwig)
+task runSwig(type:Exec, dependsOn: ['createCoreWrapperDir']) {
+
+    String osName = System.getProperty("os.name").toLowerCase();
+    if (osName.contains("windows")) {
+        workingDir '/src/main/cpp'   // This implicitly starts from $(projectDir) evidently
+        commandLine 'cmd', '/c', 'swig'
+        args '-c++', '-java', '-package', 'com.sureshjoshi.core', '-outdir', coreWrapperDir.absolutePath, 'SeePlusPlus.i'
+    }
+    else {
+        commandLine 'swig'
+        args '-java', '-package', 'nl.igorski.lib.audio.mwengine', '-DNO_RTIO', '-c++', '-lcarrays.i', '-verbose', '-outdir', coreWrapperDir.absolutePath, '-I/usr/local/include', '-I/System/Library/Frameworks/JavaVM.framework/Headers', '-I./src/main/cpp', '-o', "${projectDir}/src/main/cpp/jni/java_interface_wrap.cpp", "${projectDir}/src/main/cpp/mwengine.i"
+    }
+
 }

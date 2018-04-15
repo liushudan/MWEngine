@@ -4,7 +4,7 @@ echo ---------------------------------------
 echo Building MWEngine \(might take a moment\)
 echo ---------------------------------------
 
-( exec "./build.sh" "NDK_APPLICATION_MK=jni/Application_Test.mk" ) > /dev/null
+( exec "./build.sh" "NDK_APPLICATION_MK=src/main/cpp/Application_Test.mk" ) > /dev/null
 BUILD_SUCCESS=$?
 
 if [ $BUILD_SUCCESS -eq 0 ]; then
